@@ -1,0 +1,87 @@
+<script>
+var width = 400
+var height = 400
+var deadOrAlive = {
+  0: function () {return ifDead;},
+  1: function () {return ifAlive;},
+}
+var ifAlive = {
+  0: 0,
+  1: 0,
+  2: 1,
+  3: 1,
+  4: 0,
+  5: 0,
+  6: 0,
+  7: 0,
+  8: 0
+}
+var ifDead = {
+  0: 0,
+  1: 0,
+  2: 0,
+  3: 1,
+  4: 0,
+  5: 0,
+  6: 0,
+  7: 0,
+  8: 0
+}
+var color = {
+    1: '#FF0000',
+    0: '#FFFFFF'
+}
+var grid = generateGrid(width, height)
+var nextGen
+var canvas
+var canvasContext 
+grid = updateGrid(initialPopulate)
+function generateGrid(width, height){
+    return Array(width+1).fill().map(()=>Array(height+1).fill(null))
+}
+function updateGrid(functionToPopulate){
+    nextGen = grid.map(row => [...row]);
+    updateRow(functionToPopulate)
+    return nextGen 
+}
+function updateRow(functionToPopulate){
+    for(let xCordinate = 1; xCordinate < width; xCordinate++){
+        updateColumn(functionToPopulate, xCordinate)
+    }
+}
+function updateColumn(functionToPopulate, xCordinate){
+  for(let yCordinate = 1; yCordinate < height; yCordinate++){
+    functionToPopulate(xCordinate, yCordinate)
+  }
+}
+function initialPopulate(xCordinate, yCordinate) {
+    nextGen[xCordinate][yCordinate] = Math.round(Math.random())
+}
+function updateCell(xCordinate, yCordinate){
+    let neigbours = cellNeigbours(xCordinate, yCordinate)
+    let cellValue = grid[xCordinate][yCordinate]
+    let newCellValue = deadOrAlive[cellValue]()
+    nextGen[xCordinate][yCordinate] = newCellValue[neigbours]
+}
+function cellNeigbours(x, y) { return grid[x-1][y-1] + grid[x-1][y] + grid[x-1][y+1] + grid[x][y-1] +
+    grid[x][y+1] + grid[x+1][y-1] + grid[x+1][y] + grid[x+1][y+1]
+}
+function drawOnCanvas(x, y){
+    canvasContext.fillStyle = color[grid[x][y]]
+    canvasContext.fillRect(x, y, 1, 1);
+}
+function main(){
+    canvas = document.getElementById("myCanvas");
+    canvasContext = canvas.getContext("2d");
+    canvasContext.clearRect(0, 0, 400, 400);
+    updateGrid(drawOnCanvas)
+    grid = updateGrid(updateCell)
+    console.log("update gotov");
+    requestAnimationFrame(main)
+}
+</script>
+<html>
+    <body onload="main()">
+        <canvas id="myCanvas" width="400" height="400"></canvas>
+    </body>
+</html>
